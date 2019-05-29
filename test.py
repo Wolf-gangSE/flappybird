@@ -1,34 +1,42 @@
 import pyxel
 
+#DIRECIONAMENTO DO PASSARO
 CIMA = 0
 BAIXO = 1
 DIREITA = 2
 
-class Vetor:
-    def __init__(self, mouse_x, mouse_y):
-        self.mouse_x = mouse_x
-        self.mouse_y = mouse_y
+#MODOS DE JOGO
+INICIO = 0
+RODANDO = 1
+GAME_OVER = 3
+
+class Platforms:
+    def __init__(self):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
+
 
 class Bird:
     def __init__(self):
-        pyxel.init(200, 200)
-
-        self.bird = [(50, 100)]
+        self.bird = (50, 100)
         self.direcao = BAIXO
         self.movimento = DIREITA
-        pyxel.run(self.update, self.draw)
-        pyxel.load('BIRD.pyxel')
+        pyxel.load('Bird.pyxel')
 
     def update(self):
-        if pyxel.frame_count % 5 == 0:
+        if pyxel.frame_count % 6 == 0:
             # movimenta de acordo com entrada do usuario
             if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
                 self.direcao = CIMA
             else:
                 self.direcao = BAIXO
 
-
-        cabeca= self.bird[0]
+        cabeca= self.bird
 
         if self.movimento == DIREITA:
             cabeca = (cabeca[0] + 1, cabeca[1])
@@ -38,14 +46,38 @@ class Bird:
         elif self.direcao == BAIXO:
             cabeca = (cabeca[0], cabeca[1] + 2)
 
-        self.bird.insert(0, cabeca)
-        self.bird.pop(-1)
+        self.bird = cabeca
 
     def draw(self):
-        pyxel.cls(0)
-        for segmento in self.bird:
-            pyxel.rect(segmento[0], segmento[1], segmento[0] + 10, segmento[1] + 10, 3)
-        #desenha mouse
-        pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 2)
+        if self.direcao == CIMA:
+            pyxel.blt(self.bird[0], self.bird[1], 0, 0, 80, 16, 16, 15)
+        else:
+            pyxel.blt(self.bird[0], self.bird[1], 0, 0, 0, 16, 16, 15)
 
-Bird()
+
+class Jogo:
+    def __init__(self):
+        pyxel.init(255, 200)
+        pyxel.load('Bird.pyxel')
+        self.passaro = Bird()
+        self.modo_jogo = INICIO
+        pyxel.run(self.update, self.draw)
+
+
+    def update(self):
+        if self.modo_jogo == INICIO:
+            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
+                self.modo_jogo = RODANDO
+        if self.modo_jogo == RODANDO:
+            self.passaro.update()
+
+    def draw(self):
+        pyxel.cls(12)
+        if self.modo_jogo == INICIO:
+            pyxel.text(100, 60, 'Flappy Bird', 0)
+            pyxel.text(90, 140, 'Toque para comecar', 6)
+        if self.modo_jogo == RODANDO:
+            pyxel.blt(223, 0, 1, 0, 0, 32, 200, 12)
+        self.passaro.draw()
+        pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
+Jogo()
