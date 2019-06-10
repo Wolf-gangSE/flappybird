@@ -10,9 +10,8 @@ INICIO = 0
 RODANDO = 1
 GAME_OVER = 3
 
-class Platforms:
-    def __init__(self, FPS=30):
-        self.plataformas = []
+class Plataforma:
+    def __init__(self):
         self.x_borda1 = 231
         self.x_base1 = 235
         self.y_base1 = random.randint(0, 160)
@@ -32,36 +31,36 @@ class Platforms:
         self.x_borda1 = self.x_borda1 - 1
         self.x_borda2 = self.x_borda2 - 1
 
-        self.nova_borda1 = (self.x_borda1, self.y_borda1)
-        self.plataformas.append(self.nova_borda1)
-        self.nova_base2 = (self.x_base2, self.y_base2)
-        self.plataformas.append(self.nova_base2)
-        self.nova_base1 = (self.x_base1, self.y_base1)
-        self.plataformas.append(self.nova_base1)
-        self.nova_borda2 = (self.x_borda2, self.y_borda2)
-        self.plataformas.append(self.nova_borda2)
-
-
     def draw(self):
-        pyxel.blt(self.nova_borda1[0], self.nova_borda1[1], 0, 12, 64, 24, 8)
-        pyxel.blt(self.nova_borda2[0], self.nova_borda2[1], 0, 12, 64, 24, 8)
-        pyxel.blt(self.nova_base1[0], 0, 0, 64, 0, 16, self.distancia_base1)
-        pyxel.blt(self.nova_base2[0], self.nova_base2[1], 0, 64, 0, 16, self.distancia_base2)
+        pyxel.blt(self.x_borda1, self.y_borda1, 0, 12, 64, 24, 8)
+        pyxel.blt(self.x_borda2, self.y_borda2, 0, 12, 64, 24, 8)
+        pyxel.blt(self.x_base1, 0, 0, 64, 0, 16, self.distancia_base1)
+        pyxel.blt(self.x_base2, self.y_base2, 0, 64, 0, 16, self.distancia_base2)
 
 
 class Bird:
     def __init__(self):
         self.bird = (50, 100)
         self.direcao = BAIXO
+        self.impulso = False
+        self.click = True
         pyxel.load('Bird.pyxel')
 
     def update(self):
         if pyxel.frame_count % 6 == 0:
             # movimenta de acordo com entrada do usuario
-            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
+            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON) and self.click:
+                self.impulso = True
+                self.click = False
+            if pyxel.btnr(pyxel.MOUSE_LEFT_BUTTON):
+                self.click = True
+
+            if self.impulso:
                 self.direcao = CIMA
+                self.impulso = False
             else:
                 self.direcao = BAIXO
+
 
         cabeca= self.bird
 
@@ -81,13 +80,12 @@ class Bird:
 
 class Jogo:
     def __init__(self):
-        pyxel.init(255, 200)
+        pyxel.init(255, 200, fps=60)
         pyxel.load('Bird.pyxel')
+        self.plataformas = []
         self.passaro = Bird()
-        self.plataforms = Platforms()
         self.modo_jogo = INICIO
         pyxel.run(self.update, self.draw)
-
 
     def update(self):
         if self.modo_jogo == INICIO:
@@ -95,19 +93,29 @@ class Jogo:
                 self.modo_jogo = RODANDO
         if self.modo_jogo == RODANDO:
             self.passaro.update()
+            for p in self.plataformas:
+                p.update()
+            if pyxel.frame_count % 180 == 0:
+                self.nova_plataforma()
+        if self.modo_jogo == GAME_OVER:
+            pass
+
+    def nova_plataforma(self):
+        plataforma = Plataforma()
+        self.plataformas.append(plataforma)
 
     def draw(self):
         pyxel.cls(12)
         if self.modo_jogo == INICIO:
             pyxel.text(100, 60, 'Flappy Bird', 0)
             pyxel.text(90, 140, 'Toque para comecar', 6)
+        if self.modo_jogo == RODANDO:
+            for p in self.plataformas:
+                p.draw()
         self.passaro.draw()
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
 
-    def nova_plataforma(self):
-        if self.modo_jogo == RODANDO:
-            self.plataforms.update()
-            self.plataforms.draw()
+
 
 
 Jogo()
