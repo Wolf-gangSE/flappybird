@@ -14,7 +14,7 @@ class Plataforma:
     def __init__(self):
         self.x_borda1 = 231
         self.x_base1 = 235
-        self.y_base1 = random.randint(0, 160)
+        self.y_base1 = random.randint(0, 130)
         self.y_borda1 = self.y_base1
         self.x_borda2 = 231
         self.x_base2 = 235
@@ -39,37 +39,31 @@ class Plataforma:
 
 
 class Bird:
-    def __init__(self):
+    def __init__(self, aceleracao):
         self.bird = (50, 100)
         self.direcao = BAIXO
-        self.impulso = False
+        self.velocidade_y = 0
+        self.aceleracao = aceleracao
         self.click = True
+        self.impulso = False
         pyxel.load('Bird.pyxel')
 
     def update(self):
-        if pyxel.frame_count % 6 == 0:
-            # movimenta de acordo com entrada do usuario
-            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON) and self.click:
-                self.impulso = True
-                self.click = False
-            if pyxel.btnr(pyxel.MOUSE_LEFT_BUTTON):
-                self.click = True
+        if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON) and self.click:
+            self.impulso = True
+            self.click = False
 
-            if self.impulso:
-                self.direcao = CIMA
-                self.impulso = False
-            else:
-                self.direcao = BAIXO
+        if pyxel.btnr(pyxel.MOUSE_LEFT_BUTTON):
+            self.click = True
+            self.direcao = BAIXO
 
+        if self.impulso:
+            self.direcao = CIMA
+            self.velocidade_y = -3
+            self.impulso = False
 
-        cabeca= self.bird
-
-        if self.direcao == CIMA:
-            cabeca = (cabeca[0], cabeca[1] - 2)
-        elif self.direcao == BAIXO:
-            cabeca = (cabeca[0], cabeca[1] + 2)
-
-        self.bird = cabeca
+        self.velocidade_y += self.aceleracao
+        self.bird = (self.bird[0], self.bird[1] + self.velocidade_y)
 
     def draw(self):
         if self.direcao == CIMA:
@@ -83,7 +77,7 @@ class Jogo:
         pyxel.init(255, 200, fps=60)
         pyxel.load('Bird.pyxel')
         self.plataformas = []
-        self.passaro = Bird()
+        self.passaro = Bird(0.2)
         self.modo_jogo = INICIO
         pyxel.run(self.update, self.draw)
 
@@ -114,8 +108,5 @@ class Jogo:
                 p.draw()
         self.passaro.draw()
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
-
-
-
 
 Jogo()
