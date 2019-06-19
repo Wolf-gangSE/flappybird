@@ -1,6 +1,3 @@
-#usa euclid3
-#não pega ainda
-
 import pyxel
 import random
 import geometria as g
@@ -159,27 +156,27 @@ class Jogo:
 
     def checar_colisao(self, objeto):
         if isinstance(objeto, Plataforma):
-            if self.plataforma.borda1_inferior != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_borda1.x != 0:
                 if self.passaro.posicao.distance(objeto.borda1_inferior) <= self.raio:
                     return True
 
-            if self.plataforma.borda1_lateral != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_borda1.x != 0:
                 if self.passaro.posicao.distance(objeto.borda1_lateral) <= self.raio:
                     return True
 
-            if self.plataforma.base1_lateral != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_base1.x != 0:
                 if self.passaro.posicao.distance(objeto.base1_lateral) <= self.raio:
                     return True
 
-            if self.plataforma.borda2_superior != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_borda2.x != 0:
                 if self.passaro.posicao.distance(objeto.borda2_superior) <= self.raio:
                     return True
 
-            if self.plataforma.borda2_lateral != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_b.x != 0:
                 if self.passaro.posicao.distance(objeto.borda2_lateral) <= self.raio:
                     return True
 
-            if self.plataforma.base2_lateral != eu.LineSegment2(eu.Point2(0, 0), eu.Point2(0, 0)):
+            if self.objeto.p_sup_esq_base1.x != 0:
                 if self.passaro.posicao.distance(objeto.base2_lateral) <= self.raio:
                     return True
 
