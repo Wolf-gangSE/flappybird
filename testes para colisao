@@ -20,7 +20,9 @@ class Bird:
         self.aceleracao = aceleracao
         self.click = True
         self.impulso = False
-        self.pos_lateral = Ponto(self.bird[0], self.bird[1] + 8) #Posição do passaro (ponto)
+        self.pos_in_superior = Ponto(self.bird[0] + 8, self.bird[1])
+        self.pos_in_lateral = Ponto(self.bird[0], self.bird[1] + 8)
+        self.pos_lateral = Ponto(self.bird[0] + 16, self.bird[1] + 8) #Posição do passaro (ponto)
         self.pos_superior = Ponto(self.bird[0] + 8, self.bird[1] + 16)
         pyxel.load('Bird.pyxel')
 
@@ -62,22 +64,22 @@ class Plataforma:
         self.distancia_base1 = self.y_base1
         self.distancia_base2 = pyxel.height - self.y_base2
         #Pontos da plataforma
-        self.p_sup_esq_base1 = None
-        self.p_inf_esq_base1 = None
-        self.p_sup_dir_base1 = None
-        self.p_inf_dir_base1 = None
-        self.p_sup_esq_base2 = None
-        self.p_inf_esq_base2 = None
-        self.p_sup_dir_base2 = None
-        self.p_inf_dir_base2 = None
-        self.p_sup_esq_borda1 = None
-        self.p_inf_esq_borda1 = None
-        self.p_sup_dir_borda1 = None
-        self.p_inf_dir_borda1 = None
-        self.p_sup_esq_borda2 = None
-        self.p_inf_esq_borda2 = None
-        self.p_sup_dir_borda2 = None
-        self.p_inf_dir_borda2 = None
+        self.p_sup_esq_base1 = Ponto(0, 0)
+        self.p_inf_esq_base1 = Ponto(0, 0)
+        self.p_sup_dir_base1 = Ponto(0, 0)
+        self.p_inf_dir_base1 = Ponto(0, 0)
+        self.p_sup_esq_base2 = Ponto(0, 0)
+        self.p_inf_esq_base2 = Ponto(0, 0)
+        self.p_sup_dir_base2 = Ponto(0, 0)
+        self.p_inf_dir_base2 = Ponto(0, 0)
+        self.p_sup_esq_borda1 = Ponto(0, 0)
+        self.p_inf_esq_borda1 = Ponto(0, 0)
+        self.p_sup_dir_borda1 = Ponto(0, 0)
+        self.p_inf_dir_borda1 = Ponto(0, 0)
+        self.p_sup_esq_borda2 = Ponto(0, 0)
+        self.p_inf_esq_borda2 = Ponto(0, 0)
+        self.p_sup_dir_borda2 = Ponto(0, 0)
+        self.p_inf_dir_borda2 = Ponto(0, 0)
 
         pyxel.load('Bird.pyxel')
 
@@ -139,41 +141,41 @@ class Jogo:
 
         # checa colisao com a face lateral da base 1
         ponto = g.interseccao(self.plataforma.p_sup_esq_base1, self.plataforma.p_inf_esq_base1,
-                              self.passaro.pos_lateral[0], self.passaro.pos_lateral[1])
+                              self.passaro.pos_in_lateral, self.passaro.pos_lateral)
         if ponto:
             self.modo_jogo == GAME_OVER
 
         # checa colisao com a face superior da borda1
         ponto = g.interseccao(self.plataforma.p_sup_esq_borda1, self.plataforma.p_sup_dir_borda1,
-                              self.passaro.pos_superior.x, self.passaro.pos_superior.y)
+                              self.passaro.pos_in_superior, self.passaro.pos_superior)
         if ponto:
             self.modo_jogo == GAME_OVER
 
         # checa colisao com a face lateral da borda1
         ponto = g.interseccao(self.plataforma.p_sup_esq_borda1, self.plataforma.p_inf_esq_borda1,
-                              self.passaro.pos_lateral[0], self.passaro.pos_lateral[1])
+                              self.passaro.pos_in_lateral, self.passaro.pos_lateral)
         if ponto:
             self.modo_jogo == GAME_OVER
 
         # checa colisao com a face superior da borda2
         ponto = g.interseccao(self.plataforma.p_sup_esq_borda2, self.plataforma.p_sup_dir_borda2,
-                              self.passaro.pos_superior[0], self.passaro.pos_superior[1])
+                              self.passaro.pos_in_superior, self.passaro.pos_superior)
         if ponto:
             self.modo_jogo == GAME_OVER
 
         # checa colisao com a face lateral da borda2
         ponto = g.interseccao(self.plataforma.p_sup_esq_borda2, self.plataforma.p_inf_esq_borda2,
-                              self.passaro.pos_lateral[0], self.passaro.pos_lateral[1])
+                              self.passaro.pos_in_lateral, self.passaro.pos_lateral)
         if ponto:
             self.modo_jogo == GAME_OVER
 
         # checa colisao com a face lateral da base2
         ponto = g.interseccao(self.plataforma.p_sup_esq_base2, self.plataforma.p_inf_esq_base2,
-                              self.passaro.pos_lateral[0], self.passaro.pos_lateral[1])
+                              self.passaro.pos_in_lateral, self.passaro.pos_lateral)
         if ponto:
             self.modo_jogo == GAME_OVER
 
-        self.plataformas.append(plataforma)
+        self.plataformas.append(self.plataforma)
 
     def draw(self):
         pyxel.cls(12)
@@ -183,6 +185,8 @@ class Jogo:
         if self.modo_jogo == RODANDO:
             for p in self.plataformas:
                 p.draw()
+        if self.modo_jogo == GAME_OVER:
+            pyxel.text(100, 60, 'Você perdeu!', 0)
         self.passaro.draw()
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
 
