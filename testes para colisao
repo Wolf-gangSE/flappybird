@@ -1,3 +1,5 @@
+#colisao nao funcionou
+
 import pyxel
 import random
 import geometria as g
