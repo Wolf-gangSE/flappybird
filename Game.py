@@ -1,5 +1,8 @@
 import pyxel
 import random
+import geometria as g
+from geometria import Ponto
+import euclid3 as eu
 
 # DIRECIONAMENTO DO PASSARO
 CIMA = 0
@@ -10,37 +13,11 @@ INICIO = 0
 RODANDO = 1
 GAME_OVER = 3
 
-class Plataforma:
-    def __init__(self):
-        self.x_borda1 = 231
-        self.x_base1 = 235
-        self.y_base1 = random.randint(0, 130)
-        self.y_borda1 = self.y_base1
-        self.x_borda2 = 231
-        self.x_base2 = 235
-        self.y_borda2 = self.y_borda1 + 60
-        self.y_base2 = self.y_borda2 + 8
-        self.distancia_base1 = self.y_base1
-        self.distancia_base2 = pyxel.height - self.y_base2
-
-        pyxel.load('Bird.pyxel')
-
-    def update(self):
-        self.x_base1 = self.x_base1 - 1
-        self.x_base2 = self.x_base2 - 1
-        self.x_borda1 = self.x_borda1 - 1
-        self.x_borda2 = self.x_borda2 - 1
-
-    def draw(self):
-        pyxel.blt(self.x_borda1, self.y_borda1, 0, 12, 64, 24, 8)
-        pyxel.blt(self.x_borda2, self.y_borda2, 0, 12, 64, 24, 8)
-        pyxel.blt(self.x_base1, 0, 0, 64, 0, 16, self.distancia_base1)
-        pyxel.blt(self.x_base2, self.y_base2, 0, 64, 0, 16, self.distancia_base2)
-
-
 class Bird:
     def __init__(self, aceleracao):
         self.bird = (50, 100)
+        self.raio = 8.0
+        self.circulo = eu.Circle(eu.Point2(self.bird[0] + 8, self.bird[1]+ 8), self.raio)
         self.direcao = BAIXO
         self.velocidade_y = 0
         self.aceleracao = aceleracao
@@ -64,6 +41,9 @@ class Bird:
 
         self.velocidade_y += self.aceleracao
         self.bird = (self.bird[0], self.bird[1] + self.velocidade_y)
+        self.posicao = eu.Point2(self.bird[0] + 8, self.bird[1] + 8)
+        self.circulo = eu.Circle(eu.Point2(self.posicao.x, self.posicao.y), self.raio)
+
 
     def draw(self):
         if self.direcao == CIMA:
@@ -72,11 +52,91 @@ class Bird:
             pyxel.blt(self.bird[0], self.bird[1], 0, 0, 0, 16, 16, 15)
 
 
+class Plataforma:
+    def __init__(self):
+        self.x_borda1 = 231
+        self.x_base1 = 235
+        self.y_base1 = random.randint(0, 130)
+        self.y_borda1 = self.y_base1
+        self.x_borda2 = 231
+        self.x_base2 = 235
+        self.y_borda2 = self.y_borda1 + 60
+        self.y_base2 = self.y_borda2 + 8
+        self.distancia_base1 = self.y_base1
+        self.distancia_base2 = pyxel.height - self.y_base2
+
+        #Pontos da plataforma
+        self.p_sup_esq_base1 = eu.Point2(0, 0)
+        self.p_inf_esq_base1 = eu.Point2(0, 0)
+        self.p_sup_dir_base1 = eu.Point2(0, 0)
+        self.p_inf_dir_base1 = eu.Point2(0, 0)
+        self.p_sup_esq_base2 = eu.Point2(0, 0)
+        self.p_inf_esq_base2 = eu.Point2(0, 0)
+        self.p_sup_dir_base2 = eu.Point2(0, 0)
+        self.p_inf_dir_base2 = eu.Point2(0, 0)
+        self.p_sup_esq_borda1 = eu.Point2(0, 0)
+        self.p_inf_esq_borda1 = eu.Point2(0, 0)
+        self.p_sup_dir_borda1 = eu.Point2(0, 0)
+        self.p_inf_dir_borda1 = eu.Point2(0, 0)
+        self.p_sup_esq_borda2 = eu.Point2(0, 0)
+        self.p_inf_esq_borda2 = eu.Point2(0, 0)
+        self.p_sup_dir_borda2 = eu.Point2(0, 0)
+        self.p_inf_dir_borda2 = eu.Point2(0, 0)
+
+        self.borda1_inferior = eu.LineSegment2(self.p_sup_esq_borda1, self.p_sup_dir_borda1)
+        self.borda1_lateral = eu.LineSegment2(self.p_sup_esq_borda1, self.p_inf_esq_borda1)
+        self.base1_lateral = eu.LineSegment2(self.p_sup_esq_base1, self.p_inf_esq_base1)
+
+        self.borda2_superior = eu.LineSegment2(self.p_sup_esq_borda2, self.p_sup_dir_borda2)
+        self.borda2_lateral = eu.LineSegment2(self.p_sup_esq_borda2, self.p_inf_esq_borda2)
+        self.base2_lateral = eu.LineSegment2(self.p_sup_esq_base2, self.p_inf_esq_base2)
+
+        pyxel.load('Bird.pyxel')
+
+    def update(self):
+        self.x_base1 = self.x_base1 - 1
+        self.x_base2 = self.x_base2 - 1
+        self.x_borda1 = self.x_borda1 - 1
+        self.x_borda2 = self.x_borda2 - 1
+
+        #pontos da base1
+        self.p_sup_esq_base1 = eu.Point2(self.x_base1, 0)
+        self.p_inf_esq_base1 = eu.Point2(self.x_base1, self.y_base1)
+        #pontos da base2
+        self.p_sup_esq_base2 = eu.Point2(self.x_base2, self.y_base2)
+        self.p_inf_esq_base2 = eu.Point2(self.x_base2, pyxel.height)
+        #pontos da borda1
+        self.p_sup_esq_borda1 = eu.Point2(self.x_borda1, self.y_borda1)
+        self.p_inf_esq_borda1 = eu.Point2(self.x_borda1, self.y_borda1 + 8)
+        self.p_sup_dir_borda1 = eu.Point2(self.x_borda1 + 24, self.y_borda1)
+        #pontos da borda2
+        self.p_sup_esq_borda2 = eu.Point2(self.x_borda2, self.y_borda2)
+        self.p_inf_esq_borda2 = eu.Point2(self.x_borda2, self.y_borda2 + 8)
+        self.p_sup_dir_borda2 = eu.Point2(self.x_borda2 + 24, self.y_borda2)
+
+        self.borda1_inferior = eu.LineSegment2(self.p_sup_esq_borda1, self.p_sup_dir_borda1)
+        self.borda1_lateral = eu.LineSegment2(self.p_sup_esq_borda1, self.p_inf_esq_borda1)
+        self.base1_lateral = eu.LineSegment2(self.p_sup_esq_base1, self.p_inf_esq_base1)
+
+        self.borda2_superior = eu.LineSegment2(self.p_sup_esq_borda2, self.p_sup_dir_borda2)
+        self.borda2_lateral = eu.LineSegment2(self.p_sup_esq_borda2, self.p_inf_esq_borda2)
+        self.base2_lateral = eu.LineSegment2(self.p_sup_esq_base2, self.p_inf_esq_base2)
+
+    def draw(self):
+        pyxel.blt(self.x_borda1, self.y_borda1, 0, 12, 64, 24, 8)
+        pyxel.blt(self.x_borda2, self.y_borda2, 0, 12, 64, 24, 8)
+        pyxel.blt(self.x_base1, 0, 0, 64, 0, 16, self.distancia_base1)
+        pyxel.blt(self.x_base2, self.y_base2, 0, 64, 0, 16, self.distancia_base2)
+
+
+
 class Jogo:
     def __init__(self):
         pyxel.init(255, 200, fps=60)
         pyxel.load('Bird.pyxel')
         self.plataformas = []
+        self.score = 0
+        self.pontuacao_padrao = 1
         self.passaro = Bird(0.2)
         self.modo_jogo = INICIO
         pyxel.run(self.update, self.draw)
@@ -85,28 +145,70 @@ class Jogo:
         if self.modo_jogo == INICIO:
             if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
                 self.modo_jogo = RODANDO
+
+        if self.passaro.bird[1] > pyxel.height:
+            self.modo_jogo = GAME_OVER
+
         if self.modo_jogo == RODANDO:
             self.passaro.update()
             for p in self.plataformas:
                 p.update()
-            if pyxel.frame_count % 180 == 0:
+                if self.checar_colisao(p):
+                    self.modo_jogo = GAME_OVER
+                else:
+                    self.score += self.pontuacao_padrao
+
+            if pyxel.frame_count % 100 == 0:
                 self.nova_plataforma()
+                
         if self.modo_jogo == GAME_OVER:
-            pass
+            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
+                self.passaro.direcao = BAIXO
+
+    def checar_colisao(self, objeto):
+        if isinstance(objeto, Plataforma):
+            if self.plataforma.p_sup_esq_borda1.x != 0:
+                if self.passaro.posicao.distance(objeto.borda1_inferior) <= self.passaro.raio:
+                    return True
+
+            if self.plataforma.p_sup_esq_borda1.x != 0:
+                if self.passaro.posicao.distance(objeto.borda1_lateral) <= self.passaro.raio:
+                    return True
+
+            if self.plataforma.p_sup_esq_base1.x != 0:
+                if self.passaro.posicao.distance(objeto.base1_lateral) <= self.passaro.raio:
+                    return True
+
+            if self.plataforma.p_sup_esq_borda2.x != 0:
+                if self.passaro.posicao.distance(objeto.borda2_superior) <= self.passaro.raio:
+                    return True
+
+            if self.plataforma.p_sup_esq_borda2.x != 0:
+                if self.passaro.posicao.distance(objeto.borda2_lateral) <= self.passaro.raio:
+                    return True
+
+            if self.plataforma.p_sup_esq_base1.x != 0:
+                if self.passaro.posicao.distance(objeto.base2_lateral) <= self.passaro.raio:
+                    return True
 
     def nova_plataforma(self):
-        plataforma = Plataforma()
-        self.plataformas.append(plataforma)
+        self.plataforma = Plataforma()
+        self.plataformas.append(self.plataforma)
+
 
     def draw(self):
         pyxel.cls(12)
         if self.modo_jogo == INICIO:
             pyxel.text(100, 60, 'Flappy Bird', 0)
             pyxel.text(90, 140, 'Toque para comecar', 6)
+            self.passaro.draw()
         if self.modo_jogo == RODANDO:
+            self.passaro.draw()
             for p in self.plataformas:
                 p.draw()
-        self.passaro.draw()
+        if self.modo_jogo == GAME_OVER:
+            pyxel.text(102, 60, 'GAME OVER!', pyxel.frame_count % 20)
+            pyxel.text(106, 140, 'SCORE: {}'.format(self.score), 7)
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
 
 Jogo()
