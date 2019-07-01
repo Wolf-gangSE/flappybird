@@ -64,6 +64,7 @@ class Plataforma:
         self.y_base2 = self.y_borda2 + 8
         self.distancia_base1 = self.y_base1
         self.distancia_base2 = pyxel.height - self.y_base2
+        self.pont_n_contabilizada = True
 
         #Pontos da plataforma
         self.p_sup_esq_base1 = eu.Point2(0, 0)
@@ -128,13 +129,27 @@ class Plataforma:
         pyxel.blt(self.x_base1, 0, 0, 64, 0, 16, self.distancia_base1)
         pyxel.blt(self.x_base2, self.y_base2, 0, 64, 0, 16, self.distancia_base2)
 
+class Nuvem:
+    def __init__(self):
+        self.x_nuvem = 235
+        self.y_nuvem = random.randint(20, 140)
+        self.nuvem = (self.x_nuvem, self.y_nuvem)
 
+    def update(self):
+        self.x_nuvem = self.x_nuvem - 1
+        self.nuvem = (self.x_nuvem, self.y_nuvem)
+
+
+
+    def draw(self):
+        pyxel.blt(self.x_nuvem, self.y_nuvem, 0, 32, 32, 24, 16, 14)
 
 class Jogo:
     def __init__(self):
         pyxel.init(255, 200, fps=60)
         pyxel.load('Bird.pyxel')
         self.plataformas = []
+        self.nuvens = []
         self.score = 0
         self.pontuacao_padrao = 1
         self.passaro = Bird(0.2)
@@ -155,15 +170,26 @@ class Jogo:
                 p.update()
                 if self.checar_colisao(p):
                     self.modo_jogo = GAME_OVER
-                else:
+                if self.passaro.bird[0] > (p.x_base2 + 16) and p.pont_n_contabilizada:
+                    p.pont_n_contabilizada = False
                     self.score += self.pontuacao_padrao
+
+            for n in self.nuvens:
+                n.update()
 
             if pyxel.frame_count % 100 == 0:
                 self.nova_plataforma()
-                
+
+            if pyxel. frame_count % 75 == 0:
+                self.nova_nuvem()
+
         if self.modo_jogo == GAME_OVER:
             if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
                 self.passaro.direcao = BAIXO
+
+    def nova_nuvem(self):
+        self.nuvem = Nuvem()
+        self.nuvens.append(self.nuvem)
 
     def checar_colisao(self, objeto):
         if isinstance(objeto, Plataforma):
@@ -203,11 +229,15 @@ class Jogo:
             pyxel.text(90, 140, 'Toque para comecar', 6)
             self.passaro.draw()
         if self.modo_jogo == RODANDO:
+            for n in self.nuvens:
+                n.draw()
             self.passaro.draw()
             for p in self.plataformas:
                 p.draw()
+
         if self.modo_jogo == GAME_OVER:
-            pyxel.text(102, 60, 'GAME OVER!', pyxel.frame_count % 20)
+            pyxel.cls(0)
+            pyxel.text(102, 60, 'GAME OVER!', pyxel.frame_count % 25)
             pyxel.text(106, 140, 'SCORE: {}'.format(self.score), 7)
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 16, 16, 16, 1)
 
