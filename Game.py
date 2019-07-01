@@ -132,14 +132,12 @@ class Plataforma:
 class Nuvem:
     def __init__(self):
         self.x_nuvem = 235
-        self.y_nuvem = random.randint(20, 140)
+        self.y_nuvem = random.randint(20, 90)
         self.nuvem = (self.x_nuvem, self.y_nuvem)
 
     def update(self):
         self.x_nuvem = self.x_nuvem - 1
         self.nuvem = (self.x_nuvem, self.y_nuvem)
-
-
 
     def draw(self):
         pyxel.blt(self.x_nuvem, self.y_nuvem, 0, 32, 32, 24, 16, 14)
@@ -152,6 +150,7 @@ class Jogo:
         self.nuvens = []
         self.score = 0
         self.pontuacao_padrao = 1
+        self.recomecar = False
         self.passaro = Bird(0.2)
         self.modo_jogo = INICIO
         pyxel.run(self.update, self.draw)
@@ -163,6 +162,9 @@ class Jogo:
 
         if self.passaro.bird[1] > pyxel.height:
             self.modo_jogo = GAME_OVER
+        if self.passaro.bird[1] < 0:
+            self.modo_jogo = GAME_OVER
+
 
         if self.modo_jogo == RODANDO:
             self.passaro.update()
@@ -184,8 +186,7 @@ class Jogo:
                 self.nova_nuvem()
 
         if self.modo_jogo == GAME_OVER:
-            if pyxel.btn(pyxel.MOUSE_LEFT_BUTTON):
-                self.passaro.direcao = BAIXO
+            pass
 
     def nova_nuvem(self):
         self.nuvem = Nuvem()
@@ -220,7 +221,6 @@ class Jogo:
     def nova_plataforma(self):
         self.plataforma = Plataforma()
         self.plataformas.append(self.plataforma)
-
 
     def draw(self):
         pyxel.cls(12)
